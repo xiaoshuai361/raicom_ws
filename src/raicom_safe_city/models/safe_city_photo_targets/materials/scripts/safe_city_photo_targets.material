@@ -1,0 +1,56 @@
+material SafeCityPhotoTargets/TrashFoodWaste
+{
+  technique
+  {
+    pass
+    {
+      lighting on
+      ambient 1 1 1 1
+      diffuse 1 1 1 1
+      specular 0.05 0.05 0.05 1 8
+      texture_unit
+      {
+        texture trash_food_waste.jpg
+        filtering trilinear
+      }
+    }
+  }
+}
+
+material SafeCityPhotoTargets/BuildingFire
+{
+  technique
+  {
+    pass
+    {
+      lighting on
+      ambient 1 1 1 1
+      diffuse 1 1 1 1
+      specular 0.05 0.05 0.05 1 8
+      texture_unit
+      {
+        texture building_fire.jpg
+        filtering trilinear
+      }
+    }
+  }
+}
+
+material SafeCityPhotoTargets/CrowdPeople
+{
+  technique
+  {
+    pass
+    {
+      lighting on
+      ambient 1 1 1 1
+      diffuse 1 1 1 1
+      specular 0.05 0.05 0.05 1 8
+      texture_unit
+      {
+        texture crowd_people.jpg
+        filtering trilinear
+      }
+    }
+  }
+}

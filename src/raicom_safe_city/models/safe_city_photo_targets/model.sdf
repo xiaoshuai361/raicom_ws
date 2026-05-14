@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="safe_city_photo_targets">
+    <static>true</static>
+  </model>
+</sdf>

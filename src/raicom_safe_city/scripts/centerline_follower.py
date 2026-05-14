@@ -91,6 +91,7 @@ class CenterlineFollower:
         self.max_cross_track_for_full_slowdown = rospy.get_param("~max_cross_track_for_full_slowdown", 0.16)
         self.finish_tolerance = rospy.get_param("~finish_tolerance", 0.16)
         self.auto_start = rospy.get_param("~auto_start", True)
+        self.verbose = rospy.get_param("~verbose", False)
         self.last_debug_time = rospy.Time(0)
 
         self.points = build_centerline(self.path_step)
@@ -105,12 +106,13 @@ class CenterlineFollower:
         self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback, queue_size=20)
         self.publish_path()
 
-        rospy.loginfo(
-            "[中心线跟踪] 已生成车体安全中心轨迹：%d 个点，总长 %.2fm，lookahead=%.2fm。",
-            len(self.points),
-            self.lengths[-1],
-            self.lookahead,
-        )
+        if self.verbose:
+            rospy.loginfo(
+                "[中心线跟踪] 已生成车体安全中心轨迹：%d 个点，总长 %.2fm，lookahead=%.2fm。",
+                len(self.points),
+                self.lengths[-1],
+                self.lookahead,
+            )
 
     def odom_callback(self, msg):
         q = msg.pose.pose.orientation
@@ -199,7 +201,8 @@ class CenterlineFollower:
         if near_finish and final_dist <= self.finish_tolerance:
             self.finished = True
             self.stop()
-            rospy.loginfo("[中心线跟踪] 已沿跑道中心线完整一圈并回到起点，终点距离 %.2fm。", final_dist)
+            if self.verbose:
+                rospy.loginfo("[中心线跟踪] 已沿跑道中心线完整一圈并回到起点，终点距离 %.2fm。", final_dist)
             return
 
         target = self.lookahead_index(nearest)
@@ -229,7 +232,7 @@ class CenterlineFollower:
         self.cmd_pub.publish(cmd)
 
         now = rospy.Time.now()
-        if (now - self.last_debug_time).to_sec() > 1.5:
+        if self.verbose and (now - self.last_debug_time).to_sec() > 1.5:
             self.last_debug_time = now
             rospy.loginfo(
                 "[中心线跟踪] 横向误差=%.3fm, 航向误差=%.2frad, 前方曲率=%.2f, v=%.2f, w=%.2f",
@@ -248,7 +251,8 @@ class CenterlineFollower:
                 text = ""
             self.started = text == "start"
             if not self.started:
-                rospy.loginfo("[中心线跟踪] 未输入 start，退出。")
+                if self.verbose:
+                    rospy.loginfo("[中心线跟踪] 未输入 start，退出。")
                 return
 
         rate = rospy.Rate(20.0)

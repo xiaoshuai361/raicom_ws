@@ -717,6 +717,45 @@
           </material>
         </visual>
       </link>
+      <link name="photo_trash_food_waste">
+        <pose>0.0000 1.0200 0.1650 0 0 0.000000</pose>
+        <visual name="visual">
+          <geometry><box><size>0.4400 0.0080 0.2700</size></box></geometry>
+          <material>
+            <script>
+              <uri>model://safe_city_photo_targets/materials/scripts</uri>
+              <uri>model://safe_city_photo_targets/materials/textures</uri>
+              <name>SafeCityPhotoTargets/TrashFoodWaste</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+      <link name="photo_crowd_people">
+        <pose>-1.0200 0.0000 0.1650 0 0 1.570796</pose>
+        <visual name="visual">
+          <geometry><box><size>0.4400 0.0080 0.2700</size></box></geometry>
+          <material>
+            <script>
+              <uri>model://safe_city_photo_targets/materials/scripts</uri>
+              <uri>model://safe_city_photo_targets/materials/textures</uri>
+              <name>SafeCityPhotoTargets/CrowdPeople</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+      <link name="photo_building_fire">
+        <pose>0.1500 -1.0200 0.1650 0 0 0.000000</pose>
+        <visual name="visual">
+          <geometry><box><size>0.5200 0.0080 0.2700</size></box></geometry>
+          <material>
+            <script>
+              <uri>model://safe_city_photo_targets/materials/scripts</uri>
+              <uri>model://safe_city_photo_targets/materials/textures</uri>
+              <name>SafeCityPhotoTargets/BuildingFire</name>
+            </script>
+          </material>
+        </visual>
+      </link>
       <link name="track_wall_01">
         <pose>1.7775 1.2379 0.1500 0 0 1.636246</pose>
         <collision name="collision">

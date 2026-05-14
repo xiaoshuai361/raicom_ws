@@ -111,6 +111,25 @@ def box_link(name, pose, size, color_key, collision):
       </link>"""
 
 
+def photo_panel_link(name, pose, size, material_name):
+    x, y, z, yaw = pose
+    sx, sy, sz = size
+    return f"""
+      <link name="{escape(name)}">
+        <pose>{x:.4f} {y:.4f} {z:.4f} 0 0 {yaw:.6f}</pose>
+        <visual name="visual">
+          <geometry><box><size>{sx:.4f} {sy:.4f} {sz:.4f}</size></box></geometry>
+          <material>
+            <script>
+              <uri>model://safe_city_photo_targets/materials/scripts</uri>
+              <uri>model://safe_city_photo_targets/materials/textures</uri>
+              <name>{escape(material_name)}</name>
+            </script>
+          </material>
+        </visual>
+      </link>"""
+
+
 def marker_links():
     links = []
     z = 0.012
@@ -135,6 +154,42 @@ def marker_links():
     return links
 
 
+def photo_target_links():
+    links = []
+    z = 0.165
+    panel_height = 0.27
+    panel_thickness = 0.008
+    face_offset = WALL_THICKNESS / 2.0 + 0.010
+
+    # The panels are visual-only and sit just outside the inner wall faces,
+    # facing the 80cm lane where the side camera passes.
+    links.append(
+        photo_panel_link(
+            "photo_trash_food_waste",
+            (0.0, INNER_HALF_Y + face_offset, z, 0.0),
+            (0.44, panel_thickness, panel_height),
+            "SafeCityPhotoTargets/TrashFoodWaste",
+        )
+    )
+    links.append(
+        photo_panel_link(
+            "photo_crowd_people",
+            (-INNER_HALF_X - face_offset, 0.0, z, math.pi / 2.0),
+            (0.44, panel_thickness, panel_height),
+            "SafeCityPhotoTargets/CrowdPeople",
+        )
+    )
+    links.append(
+        photo_panel_link(
+            "photo_building_fire",
+            (0.15, -INNER_HALF_Y - face_offset, z, 0.0),
+            (0.52, panel_thickness, panel_height),
+            "SafeCityPhotoTargets/BuildingFire",
+        )
+    )
+    return links
+
+
 def write_world(path):
     links = []
     links.append(box_link("floor_4m", (0.0, 0.0, -0.011, 0.0), (FIELD_SIZE, FIELD_SIZE, 0.02), "floor", True))
@@ -146,6 +201,7 @@ def write_world(path):
         links.append(box_link(f"road_tile_{idx:02d}", pose, size, "road", collision=False))
 
     links.extend(marker_links())
+    links.extend(photo_target_links())
 
     for idx, (p1, p2) in enumerate(WALL_SEGMENTS, start=1):
         pose, size = segment_pose_and_size(p1, p2, WALL_THICKNESS, WALL_HEIGHT, WALL_HEIGHT / 2.0)
