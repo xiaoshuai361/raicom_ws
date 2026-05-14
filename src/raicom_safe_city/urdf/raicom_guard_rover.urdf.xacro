@@ -1,0 +1,314 @@
+<?xml version="1.0"?>
+<robot name="raicom_guard_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="wheel_radius" value="0.033"/>
+  <xacro:property name="wheel_width" value="0.022"/>
+  <xacro:property name="wheel_base" value="0.190"/>
+  <xacro:property name="wheel_track" value="0.218"/>
+  <xacro:property name="drive_wheel_separation" value="0.340"/>
+  <xacro:property name="body_length" value="0.305"/>
+  <xacro:property name="body_width" value="0.200"/>
+
+  <xacro:macro name="box_inertia" params="mass x y z">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="${mass*(y*y+z*z)/12.0}" ixy="0" ixz="0"
+               iyy="${mass*(x*x+z*z)/12.0}" iyz="0"
+               izz="${mass*(x*x+y*y)/12.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="mass radius length">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="${mass*(3*radius*radius+length*length)/12.0}" ixy="0" ixz="0"
+               iyy="${mass*(3*radius*radius+length*length)/12.0}" iyz="0"
+               izz="${mass*radius*radius/2.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <material name="body_white"><color rgba="0.86 0.90 0.90 1"/></material>
+  <material name="body_teal"><color rgba="0.02 0.45 0.58 1"/></material>
+  <material name="body_shadow"><color rgba="0.08 0.09 0.10 1"/></material>
+  <material name="glass_blue"><color rgba="0.22 0.60 0.80 0.82"/></material>
+  <material name="sensor_black"><color rgba="0.015 0.015 0.018 1"/></material>
+  <material name="light_gray"><color rgba="0.75 0.78 0.78 1"/></material>
+  <material name="warning_amber"><color rgba="1.00 0.44 0.04 1"/></material>
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.000" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <visual name="lower_body">
+      <origin xyz="0 0 0.052" rpy="0 0 0"/>
+      <geometry><box size="${body_length} ${body_width} 0.066"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="front_bevel">
+      <origin xyz="0.163 0 0.082" rpy="0 -0.30 0"/>
+      <geometry><box size="0.052 0.178 0.035"/></geometry>
+      <material name="body_teal"/>
+    </visual>
+    <visual name="rear_bevel">
+      <origin xyz="-0.163 0 0.080" rpy="0 0.25 0"/>
+      <geometry><box size="0.046 0.178 0.032"/></geometry>
+      <material name="body_teal"/>
+    </visual>
+    <visual name="top_deck">
+      <origin xyz="-0.020 0 0.100" rpy="0 0 0"/>
+      <geometry><box size="0.215 0.150 0.038"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="hood_panel">
+      <origin xyz="0.095 0 0.126" rpy="0 -0.16 0"/>
+      <geometry><box size="0.105 0.132 0.026"/></geometry>
+      <material name="body_teal"/>
+    </visual>
+    <visual name="cab_glass">
+      <origin xyz="-0.058 0 0.136" rpy="0 0 0"/>
+      <geometry><box size="0.094 0.116 0.056"/></geometry>
+      <material name="glass_blue"/>
+    </visual>
+    <visual name="roof_panel">
+      <origin xyz="-0.058 0 0.172" rpy="0 0 0"/>
+      <geometry><box size="0.084 0.104 0.014"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="front_light">
+      <origin xyz="0.184 0 0.066" rpy="0 0 0"/>
+      <geometry><box size="0.010 0.102 0.012"/></geometry>
+      <material name="light_gray"/>
+    </visual>
+    <visual name="left_side_rub_rail">
+      <origin xyz="0 0.103 0.072" rpy="0 0 0"/>
+      <geometry><box size="0.250 0.010 0.020"/></geometry>
+      <material name="body_shadow"/>
+    </visual>
+    <visual name="right_side_rub_rail">
+      <origin xyz="0 -0.103 0.072" rpy="0 0 0"/>
+      <geometry><box size="0.250 0.010 0.020"/></geometry>
+      <material name="body_shadow"/>
+    </visual>
+    <visual name="front_left_corner_softener">
+      <origin xyz="0.142 0.088 0.074" rpy="0 0 0"/>
+      <geometry><sphere radius="0.023"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="front_right_corner_softener">
+      <origin xyz="0.142 -0.088 0.074" rpy="0 0 0"/>
+      <geometry><sphere radius="0.023"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="rear_left_corner_softener">
+      <origin xyz="-0.142 0.088 0.074" rpy="0 0 0"/>
+      <geometry><sphere radius="0.023"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <visual name="rear_right_corner_softener">
+      <origin xyz="-0.142 -0.088 0.074" rpy="0 0 0"/>
+      <geometry><sphere radius="0.023"/></geometry>
+      <material name="body_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.067" rpy="0 0 0"/>
+      <geometry><box size="${body_length} ${body_width} 0.110"/></geometry>
+    </collision>
+    <xacro:box_inertia mass="3.6" x="${body_length}" y="${body_width}" z="0.110"/>
+  </link>
+
+  <xacro:macro name="drive_wheel" params="name x y mesh">
+    <joint name="${name}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}_wheel"/>
+      <origin xyz="${x} ${y} ${wheel_radius}" rpy="-1.57079632679 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="10.0" velocity="18.0"/>
+      <dynamics damping="0.08" friction="0.02"/>
+    </joint>
+    <link name="${name}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="1.57079632679 0 0"/>
+        <geometry>
+          <mesh filename="${mesh}" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="sensor_black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <xacro:cylinder_inertia mass="0.12" radius="${wheel_radius}" length="${wheel_width}"/>
+    </link>
+  </xacro:macro>
+
+  <xacro:drive_wheel name="front_left"  x="${wheel_base/2.0}"  y="${wheel_track/2.0}"  mesh="package://turtlebot3_description/meshes/wheels/left_tire.stl"/>
+  <xacro:drive_wheel name="front_right" x="${wheel_base/2.0}"  y="${-wheel_track/2.0}" mesh="package://turtlebot3_description/meshes/wheels/right_tire.stl"/>
+  <xacro:drive_wheel name="rear_left"   x="${-wheel_base/2.0}" y="${wheel_track/2.0}"  mesh="package://turtlebot3_description/meshes/wheels/left_tire.stl"/>
+  <xacro:drive_wheel name="rear_right"  x="${-wheel_base/2.0}" y="${-wheel_track/2.0}" mesh="package://turtlebot3_description/meshes/wheels/right_tire.stl"/>
+
+  <xacro:macro name="wheel_arch" params="name x y">
+    <link name="${name}_arch">
+      <visual name="outer_arch">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.086 0.020 0.052"/></geometry>
+        <material name="body_shadow"/>
+      </visual>
+      <visual name="top_trim">
+        <origin xyz="0 0 0.032" rpy="0 0 0"/>
+        <geometry><box size="0.078 0.030 0.012"/></geometry>
+        <material name="body_teal"/>
+      </visual>
+    </link>
+    <joint name="${name}_arch_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}_arch"/>
+      <origin xyz="${x} ${y} 0.055" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel_arch name="front_left"  x="${wheel_base/2.0}"  y="0.106"/>
+  <xacro:wheel_arch name="front_right" x="${wheel_base/2.0}"  y="-0.106"/>
+  <xacro:wheel_arch name="rear_left"   x="${-wheel_base/2.0}" y="0.106"/>
+  <xacro:wheel_arch name="rear_right"  x="${-wheel_base/2.0}" y="-0.106"/>
+
+  <link name="lidar_link">
+    <visual name="lds_mesh">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://turtlebot3_description/meshes/sensors/lds.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="sensor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry><cylinder length="0.0315" radius="0.055"/></geometry>
+    </collision>
+    <xacro:cylinder_inertia mass="0.12" radius="0.055" length="0.0315"/>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="-0.045 0 0.160" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual name="side_camera_body">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.030 0.018 0.022"/></geometry>
+      <material name="sensor_black"/>
+    </visual>
+    <visual name="side_camera_lens">
+      <origin xyz="0.019 0 0" rpy="0 1.57079632679 0"/>
+      <geometry><cylinder radius="0.006" length="0.005"/></geometry>
+      <material name="glass_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.030 0.018 0.022"/></geometry>
+    </collision>
+    <xacro:box_inertia mass="0.04" x="0.030" y="0.018" z="0.022"/>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.015 0.087 0.095" rpy="0 0 1.57079632679"/>
+  </joint>
+
+  <link name="camera_rgb_frame"/>
+  <joint name="camera_rgb_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_rgb_frame"/>
+    <origin xyz="0.022 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_rgb_optical_frame"/>
+  <joint name="camera_rgb_optical_joint" type="fixed">
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_rgb_optical_frame"/>
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679"/>
+  </joint>
+
+  <gazebo reference="front_left_wheel"><material>Gazebo/Black</material><mu1>1.15</mu1><mu2>0.18</mu2></gazebo>
+  <gazebo reference="front_right_wheel"><material>Gazebo/Black</material><mu1>1.15</mu1><mu2>0.18</mu2></gazebo>
+  <gazebo reference="rear_left_wheel"><material>Gazebo/Black</material><mu1>1.15</mu1><mu2>0.18</mu2></gazebo>
+  <gazebo reference="rear_right_wheel"><material>Gazebo/Black</material><mu1>1.15</mu1><mu2>0.18</mu2></gazebo>
+  <gazebo reference="lidar_link"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="camera_link"><material>Gazebo/Black</material></gazebo>
+
+  <gazebo>
+    <plugin name="raicom_planar_drive" filename="libgazebo_ros_planar_move.so">
+      <robotNamespace>/</robotNamespace>
+      <commandTopic>/cmd_vel</commandTopic>
+      <odometryTopic>/odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <odometryRate>50.0</odometryRate>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="lidar_link">
+    <sensor type="ray" name="raicom_low_lidar">
+      <always_on>true</always_on>
+      <update_rate>18</update_rate>
+      <visualize>false</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159265</min_angle>
+            <max_angle>3.14159265</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.07</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.003</stddev>
+        </noise>
+      </ray>
+      <plugin name="raicom_laser_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>lidar_link</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="inner_wall_side_camera">
+      <always_on>true</always_on>
+      <update_rate>15</update_rate>
+      <visualize>false</visualize>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>5.0</far>
+        </clip>
+      </camera>
+      <plugin name="raicom_side_camera_controller" filename="libgazebo_ros_camera.so">
+        <cameraName>camera</cameraName>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>15.0</updateRate>
+        <imageTopicName>rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+        <frameName>camera_rgb_optical_frame</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+</robot>

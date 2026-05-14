@@ -1,0 +1,40 @@
+<launch>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="world" default="$(find raicom_safe_city)/worlds/safe_city.world"/>
+  <arg name="model" default="waffle_pi"/>
+  <arg name="x" default="1.38"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.02"/>
+  <arg name="yaw" default="1.5708"/>
+
+  <param name="/use_sim_time" value="$(arg use_sim_time)"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro --inorder '$(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro'"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+    <param name="publish_frequency" value="50.0"/>
+  </node>
+
+  <node name="spawn_turtlebot3_safe_city" pkg="raicom_safe_city" type="spawn_robot_model.py" output="screen">
+    <param name="model_name" value="turtlebot3_$(arg model)_safe_city"/>
+    <param name="x" value="$(arg x)"/>
+    <param name="y" value="$(arg y)"/>
+    <param name="z" value="$(arg z)"/>
+    <param name="yaw" value="$(arg yaw)"/>
+    <rosparam param="cleanup_models">[raicom_guard_rover, turtlebot3_waffle_pi_safe_city, turtlebot3_burger_safe_city]</rosparam>
+  </node>
+
+  <node name="proximity_recognition" pkg="raicom_safe_city" type="proximity_recognition_node.py" output="screen"/>
+</launch>

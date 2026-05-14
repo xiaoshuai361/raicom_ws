@@ -1,0 +1,31 @@
+<launch>
+
+  <!-- world -->
+  <include file="$(find gazebo_pkg)/launch/map11.launch" />
+
+  <!-- 启动地图服务器节点 -->
+  
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find gazebo_map)/map/map11.yaml"/>
+
+  <node pkg="jie_ware" type="lidar_loc" name="lidar_loc" >
+    <param name="base_frame" value="base_link" />
+    <param name="laser_frame" value="laser_frame" />
+  </node>
+
+  <!--- Run move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base"  output="screen">
+    <rosparam file="$(find pid_planner)/nav_lidar/costmap_common_params_nav11.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find pid_planner)/nav_lidar/costmap_common_params_nav11.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find pid_planner)/nav_lidar/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find pid_planner)/nav_lidar/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find pid_planner)/nav_lidar/local_planner_params.yaml" command="load" />
+    <param name="base_global_planner" value="global_planner/GlobalPlanner" /> 
+    <param name="use_dijkstra" value="true"/>
+    <param name="base_local_planner" value="pid_planner/PIDPlanner"/>
+  </node>
+  <!-- rviz 节点 --> 
+  <node name="rviz" pkg="rviz" type="rviz" required="true" args="-d $(find gazebo_nav)/rviz/nav11.rviz" />
+
+  <node pkg="jie_ware" type="costmap_cleaner" name="costmap_cleaner"/>
+  
+</launch>

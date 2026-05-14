@@ -1,0 +1,26 @@
+<launch>
+  <arg name="rviz" default="true"/>
+  <arg name="run_waypoint_driver" default="false"/>
+  <arg name="run_camera_detector" default="false"/>
+  <arg name="auto_start" default="true"/>
+
+  <include file="$(find raicom_safe_city)/launch/navigation_tb3.launch">
+    <arg name="gui" value="true"/>
+    <arg name="rviz" value="$(arg rviz)"/>
+  </include>
+
+  <node if="$(arg run_waypoint_driver)" name="waypoint_driver" pkg="raicom_safe_city"
+        type="waypoint_driver.py" output="screen">
+    <param name="auto_start" value="$(arg auto_start)"/>
+    <param name="goal_tolerance" value="0.12"/>
+    <param name="goal_timeout" value="90.0"/>
+    <param name="max_linear" value="0.16"/>
+    <param name="max_angular" value="0.75"/>
+  </node>
+
+  <node if="$(arg run_camera_detector)" name="camera_color_detector" pkg="raicom_safe_city"
+        type="camera_color_detector.py" output="screen">
+    <param name="image_topic" value="/camera/rgb/image_raw"/>
+    <param name="min_area" value="180"/>
+  </node>
+</launch>

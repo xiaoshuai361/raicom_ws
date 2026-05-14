@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>源码环境分析报告</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #1e2430;
+      --muted: #687386;
+      --line: #dfe4ea;
+      --blue: #2468d8;
+      --green: #1f8a5b;
+      --orange: #b85f00;
+      --red: #bd2d2d;
+      --code: #101820;
+      --soft-blue: #eaf1ff;
+      --soft-green: #e9f7f0;
+      --soft-orange: #fff2df;
+      --soft-red: #fff0f0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    header {
+      background: #182235;
+      color: #fff;
+      padding: 34px 24px 28px;
+      border-bottom: 5px solid var(--blue);
+    }
+
+    header .wrap,
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 24px;
+    }
+
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 19px;
+    }
+
+    p { margin: 8px 0; }
+
+    .subtitle {
+      color: #cad5e5;
+      max-width: 900px;
+      margin: 0;
+    }
+
+    main {
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .cards {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .card,
+    .module,
+    .notice,
+    details {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin: 3px 4px 3px 0;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tag.blue { background: var(--soft-blue); color: var(--blue); border-color: #c8d8fb; }
+    .tag.green { background: var(--soft-green); color: var(--green); border-color: #c8ebda; }
+    .tag.orange { background: var(--soft-orange); color: var(--orange); border-color: #f2d5aa; }
+    .tag.red { background: var(--soft-red); color: var(--red); border-color: #f0c4c4; }
+
+    .notice {
+      border-left: 5px solid var(--orange);
+      background: #fffaf3;
+    }
+
+    .notice.ok {
+      border-left-color: var(--green);
+      background: #f5fcf8;
+    }
+
+    .notice.warn {
+      border-left-color: var(--red);
+      background: #fff7f7;
+    }
+
+    .module {
+      margin: 14px 0;
+    }
+
+    .module-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .module-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    code {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      background: #eef2f7;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    pre {
+      overflow-x: auto;
+      background: var(--code);
+      color: #eef6ff;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #eef2f7;
+      font-weight: 700;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    ul,
+    ol {
+      padding-left: 22px;
+    }
+
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 0;
+    }
+
+    .toc a {
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    details {
+      margin: 12px 0;
+      padding: 0;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 13px 16px;
+      font-weight: 700;
+    }
+
+    details > div {
+      border-top: 1px solid var(--line);
+      padding: 12px 16px 16px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 820px) {
+      main { padding: 16px; }
+      .two-col { grid-template-columns: 1fr; }
+      th, td { display: block; width: 100%; }
+      tr { display: block; border-bottom: 1px solid var(--line); }
+      tr:last-child { border-bottom: 0; }
+      th { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>源码环境分析报告</h1>
+      <p class="subtitle">面向学习和复现实验的运行环境说明。报告只分析当前文件夹代码，不改动原始程序。</p>
+      <nav class="toc">
+        <a href="#summary">总览</a>
+        <a href="#python">视觉脚本</a>
+        <a href="#ros">ROS 应用</a>
+        <a href="#commands">运行命令</a>
+        <a href="#pitfalls">注意事项</a>
+        <a href="#learning">学习路线</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="summary">
+      <h2>一、总体判断</h2>
+      <div class="notice ok">
+        <strong>结论：</strong>这个源码目录分成两大类：一类是普通 Python 视觉识别/图像处理脚本，另一类是 ROS1 + Gazebo 的机器人导航仿真工程。普通视觉脚本可以在 Windows 或 Linux 上跑；ROS 应用建议放到 Ubuntu + ROS1 Noetic 环境下跑。
+      </div>
+
+      <div class="grid cards">
+        <div class="card">
+          <strong>8 个 Python 脚本</strong>
+          <span class="muted">红绿灯、垃圾桶、楼宇火灾、人员识别、巡线、ROS 导航点发布等。</span>
+        </div>
+        <div class="card">
+          <strong>5 个 ROS 包</strong>
+          <span class="muted"><code>gazebo_map</code>、<code>gazebo_nav</code>、<code>gazebo_pkg</code>、<code>jie_ware</code>、<code>pid_planner</code>。</span>
+        </div>
+        <div class="card">
+          <strong>模型文件齐全</strong>
+          <span class="muted">包含 YOLO ONNX、PaddleOCR 推理模型、地图 PGM/YAML、Gazebo world/URDF。</span>
+        </div>
+        <div class="card">
+          <strong>已有构建痕迹</strong>
+          <span class="muted">ROS 工程曾在 <code>/home/demo/test_ws</code> 用 Python3、OpenCV4、GCC9 构建过，强烈指向 Ubuntu 20.04 + ROS Noetic。</span>
+        </div>
+      </div>
+
+      <h3>推荐环境</h3>
+      <table>
+        <tr>
+          <th>代码类型</th>
+          <th>推荐系统</th>
+          <th>Python/编译环境</th>
+          <th>核心依赖</th>
+        </tr>
+        <tr>
+          <td>视觉识别脚本</td>
+          <td>Windows 10/11 或 Ubuntu 20.04/22.04</td>
+          <td>Python 3.8 到 3.10 更稳</td>
+          <td><code>opencv-python</code>、<code>numpy</code>、<code>pillow</code>、<code>fastdeploy-python</code>、<code>rich</code></td>
+        </tr>
+        <tr>
+          <td>ROS 仿真导航</td>
+          <td>Ubuntu 20.04</td>
+          <td>ROS Noetic、catkin、GCC9、Python3</td>
+          <td><code>move_base</code>、<code>map_server</code>、<code>gazebo_ros</code>、<code>rviz</code>、<code>nav_core</code>、<code>pluginlib</code>、<code>tf/tf2</code>、<code>cv_bridge</code>、OpenCV4</td>
+        </tr>
+      </table>
+    </section>
+
+    <section id="python">
+      <h2>二、普通 Python 视觉脚本</h2>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">巡线/巡线.py</div>
+          <div>
+            <span class="tag green">可 Windows 跑</span>
+            <span class="tag blue">OpenCV 图像处理</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>读取视频，逐帧做车道线/巡线检测，输出带方向、误差、转向角度标注的视频。</p>
+        <p><strong>依赖：</strong><code>opencv-python</code>、<code>numpy</code>、<code>pillow</code>。需要能弹出 OpenCV GUI 窗口。</p>
+        <p><strong>运行方式：</strong>进入 <code>巡线</code> 目录后运行，程序会让你输入视频路径。</p>
+        <pre><code>cd 巡线
+python 巡线.py</code></pre>
+        <p><strong>学习重点：</strong>自适应阈值、ROI 区域、黑色像素分组、车道中心线、卡尔曼滤波、方向角计算。</p>
+      </article>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">红绿灯/light.py</div>
+          <div>
+            <span class="tag green">可 Windows 跑</span>
+            <span class="tag orange">FastDeploy</span>
+            <span class="tag blue">YOLOv8 ONNX</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>用 <code>红绿灯/moxing/best.onnx</code> 检测 <code>images</code> 下的红、绿、黄交通灯图片，并输出到 <code>output_images</code>。</p>
+        <p><strong>依赖：</strong><code>fastdeploy-python</code>、<code>opencv-python</code>。脚本默认置信度阈值为 0.8。</p>
+        <pre><code>cd 红绿灯
+python light.py</code></pre>
+        <p><strong>注意：</strong>模型路径是相对路径 <code>moxing/best.onnx</code>，所以要在 <code>红绿灯</code> 文件夹内运行。</p>
+      </article>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">垃圾桶/垃圾桶.py</div>
+          <div>
+            <span class="tag green">可 Windows 跑</span>
+            <span class="tag orange">FastDeploy</span>
+            <span class="tag blue">YOLOv8 ONNX</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>识别垃圾桶类别和是否已投放，类别包括可回收物、有害垃圾、厨余垃圾、其他垃圾。</p>
+        <p><strong>依赖：</strong><code>fastdeploy-python</code>、<code>opencv-python</code>、<code>numpy</code>、<code>pillow</code>。需要中文字体，目录中有 <code>moxing/ziti.ttf</code>。</p>
+        <pre><code>cd 垃圾桶
+python 垃圾桶.py</code></pre>
+        <p><strong>注意：</strong>脚本会显示图片窗口，按键继续，ESC 退出。</p>
+      </article>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">人/human.py</div>
+          <div>
+            <span class="tag green">可 Windows 跑</span>
+            <span class="tag orange">FastDeploy + ONNX Runtime</span>
+            <span class="tag blue">YOLOv5 ONNX</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>从 <code>images</code> 随机选最多 10 张图，识别职业人员和普通人员，并生成 <code>result/summary_report.jpg</code>。</p>
+        <p><strong>依赖：</strong><code>fastdeploy-python</code>、<code>opencv-python</code>、<code>numpy</code>、<code>pillow</code>。代码显式使用 CPU 和 ONNX Runtime 后端。</p>
+        <pre><code>cd 人
+python human.py</code></pre>
+        <p><strong>注意：</strong>模型文件是 <code>human.onnx</code>，字体文件是 <code>ziti.ttf</code>，都按相对路径查找。</p>
+      </article>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">楼宇火灾识别/楼宇火灾.py</div>
+          <div>
+            <span class="tag green">可 Windows 跑</span>
+            <span class="tag orange">FastDeploy</span>
+            <span class="tag blue">YOLOv8 + PPOCRv3</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>检测楼宇、识别楼宇名称、检测楼层和火焰，判断某楼某层是否着火。</p>
+        <p><strong>依赖：</strong><code>fastdeploy-python</code>、<code>opencv-python</code>、<code>numpy</code>、<code>pillow</code>、<code>rich</code>。模型包括 <code>building.onnx</code>、<code>fire.onnx</code> 和 <code>OCR</code> 下的 PaddleOCR 推理文件。</p>
+        <pre><code>cd 楼宇火灾识别
+python 楼宇火灾.py</code></pre>
+        <p><strong>学习重点：</strong>先检测建筑框，再裁剪区域做 OCR，再在建筑区域内检测楼层和火焰，最后把火焰中心点匹配到楼层框。</p>
+      </article>
+
+      <article class="module">
+        <div class="module-head">
+          <div class="module-title">楼宇火灾识别/building.py</div>
+          <div>
+            <span class="tag orange">摄像头实时版</span>
+            <span class="tag red">路径硬编码</span>
+          </div>
+        </div>
+        <p><strong>功能：</strong>打开默认摄像头，运行 30 秒左右触发一次楼宇检测。</p>
+        <p><strong>依赖：</strong><code>fastdeploy-python</code>、<code>opencv-python</code>、<code>numpy</code>，并且需要本机有摄像头。</p>
+        <p><strong>重要限制：</strong>模型路径写死为 <code>/home/eaibot/yolov5/models/building.onnx</code>。如果这台机器没有这个 Linux 路径，按原样运行会失败。</p>
+      </article>
+
+      <details>
+        <summary>视觉脚本依赖安装参考</summary>
+        <div>
+          <p>普通 OpenCV 脚本可先安装：</p>
+          <pre><code>pip install opencv-python numpy pillow rich</code></pre>
+          <p>FastDeploy 的安装跟 Python 版本、CPU/GPU、操作系统有关。建议用 Python 3.8 到 3.10，并优先选择 CPU 版先跑通。若使用 GPU，需要匹配 CUDA、cuDNN、ONNX Runtime 或 Paddle 后端。</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="ros">
+      <h2>三、ROS 应用环境</h2>
+      <div class="notice">
+        <strong>核心判断：</strong><code>ROS应用</code> 是一个 catkin 工作空间，里面有 <code>src</code>、<code>build</code>、<code>devel</code>。构建缓存显示它原来位于 <code>/home/demo/test_ws</code>，使用 <code>/usr/bin/python3</code>、GCC9、OpenCV4，最匹配的环境是 Ubuntu 20.04 + ROS Noetic。
+      </div>
+
+      <h3>ROS 包作用</h3>
+      <table>
+        <tr>
+          <th>包名</th>
+          <th>作用</th>
+          <th>关键文件</th>
+        </tr>
+        <tr>
+          <td><code>gazebo_pkg</code></td>
+          <td>提供 Gazebo 世界、机器人 URDF/Xacro、mesh、启动仿真环境。</td>
+          <td><code>launch/map11.launch</code>、<code>world/map11.world</code>、<code>urdf/waking_robot_new.xacro</code></td>
+        </tr>
+        <tr>
+          <td><code>gazebo_map</code></td>
+          <td>提供地图、Hector SLAM 建图启动文件、RViz 配置。</td>
+          <td><code>map/map11.yaml</code>、<code>map/map11.pgm</code>、<code>launch/hector_mapping_map11.launch</code></td>
+        </tr>
+        <tr>
+          <td><code>gazebo_nav</code></td>
+          <td>导航仿真入口，启动 Gazebo、地图服务器、激光定位、move_base、RViz。</td>
+          <td><code>launch/nav11.launch</code></td>
+        </tr>
+        <tr>
+          <td><code>jie_ware</code></td>
+          <td>激光定位、雷达滤波、代价地图清理工具。</td>
+          <td><code>src/lidar_loc.cpp</code>、<code>src/lidar_filter_node.cpp</code>、<code>src/costmap_cleaner.cpp</code></td>
+        </tr>
+        <tr>
+          <td><code>pid_planner</code></td>
+          <td>自制 move_base 局部规划器插件，实现 <code>nav_core::BaseLocalPlanner</code> 接口。</td>
+          <td><code>src/pid_planner.cpp</code>、<code>pid_planner_plugin.xml</code>、<code>nav_lidar/*.yaml</code></td>
+        </tr>
+      </table>
+
+      <h3>需要安装的 ROS 组件</h3>
+      <div class="two-col">
+        <div class="card">
+          <strong>基础组件</strong>
+          <p><code>ros-noetic-desktop-full</code>、<code>catkin</code>、<code>gazebo_ros</code>、<code>rviz</code>、<code>xacro</code>、<code>robot_state_publisher</code>、<code>joint_state_publisher</code>。</p>
+        </div>
+        <div class="card">
+          <strong>导航组件</strong>
+          <p><code>move_base</code>、<code>map_server</code>、<code>amcl</code>、<code>global_planner</code>、<code>costmap_2d</code>、<code>nav_core</code>、<code>pluginlib</code>、<code>move_base_msgs</code>、<code>actionlib</code>。</p>
+        </div>
+        <div class="card">
+          <strong>TF 与消息</strong>
+          <p><code>tf</code>、<code>tf2</code>、<code>tf2_ros</code>、<code>tf2_geometry_msgs</code>、<code>geometry_msgs</code>、<code>nav_msgs</code>、<code>sensor_msgs</code>、<code>std_msgs</code>、<code>std_srvs</code>。</p>
+        </div>
+        <div class="card">
+          <strong>图像/编译</strong>
+          <p><code>cv_bridge</code>、OpenCV4、CMake、GCC/G++。源码中的 CMake 已查找 <code>OpenCV REQUIRED</code>。</p>
+        </div>
+      </div>
+
+      <h3>ROS 运行链路</h3>
+      <ol>
+        <li><code>roslaunch gazebo_nav nav11.launch</code> 启动 Gazebo 场景和机器人。</li>
+        <li><code>map_server</code> 加载 <code>gazebo_map/map/map11.yaml</code>。</li>
+        <li><code>jie_ware/lidar_loc</code> 用激光雷达和地图做定位。</li>
+        <li><code>move_base</code> 使用 <code>global_planner/GlobalPlanner</code> 做全局路径，使用 <code>pid_planner/PIDPlanner</code> 做局部速度控制。</li>
+        <li><code>ROS应用/nav.py</code> 作为动作客户端，向 <code>move_base</code> 连续发送 8 个导航点。</li>
+      </ol>
+
+      <div class="notice warn">
+        <strong>地图路径问题：</strong><code>map1.yaml</code> 和 <code>src/gazebo_map/map/map11.yaml</code> 里面的 <code>image</code> 都写成了 <code>/home/demo/test_ws/...</code> 这样的绝对路径。若你的工作空间不是这个路径，地图服务器可能找不到 PGM。学习时要知道这是移植 ROS 工程最常见的问题之一。
+      </div>
+    </section>
+
+    <section id="commands">
+      <h2>四、运行命令参考</h2>
+
+      <h3>视觉脚本</h3>
+      <pre><code># 巡线视频处理
+cd 巡线
+python 巡线.py
+
+# 红绿灯识别
+cd 红绿灯
+python light.py
+
+# 垃圾桶识别
+cd 垃圾桶
+python 垃圾桶.py
+
+# 人员识别
+cd 人
+python human.py
+
+# 楼宇火灾识别
+cd 楼宇火灾识别
+python 楼宇火灾.py</code></pre>
+
+      <h3>ROS 仿真导航</h3>
+      <pre><code># 建议在 Ubuntu 20.04 + ROS Noetic 下
+cd ROS应用
+source /opt/ros/noetic/setup.bash
+catkin_make
+source devel/setup.bash
+
+# 启动仿真导航
+roslaunch gazebo_nav nav11.launch
+
+# 另开终端，发送 8 个导航点
+cd ROS应用
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+python3 nav.py</code></pre>
+
+      <h3>ROS 建图入口</h3>
+      <pre><code>cd ROS应用
+source /opt/ros/noetic/setup.bash
+source devel/setup.bash
+roslaunch gazebo_map hector_mapping_map11.launch</code></pre>
+    </section>
+
+    <section id="pitfalls">
+      <h2>五、常见注意事项</h2>
+      <details open>
+        <summary>1. 相对路径要求很强</summary>
+        <div>
+          <p>多数 Python 脚本都用类似 <code>images</code>、<code>moxing/best.onnx</code>、<code>result</code> 这样的相对路径。运行时必须先 <code>cd</code> 到对应子目录，否则会找不到模型或图片。</p>
+        </div>
+      </details>
+      <details>
+        <summary>2. FastDeploy 版本要匹配</summary>
+        <div>
+          <p>这些脚本依赖 FastDeploy 的 <code>fd.vision.detection.YOLOv8</code>、<code>YOLOv5</code>、<code>fd.vision.ocr</code> API。建议用同一套 Python 环境先跑一个最小模型加载测试，再批量跑图片。</p>
+        </div>
+      </details>
+      <details>
+        <summary>3. OpenCV GUI 不能在纯命令行环境显示</summary>
+        <div>
+          <p>代码里大量使用 <code>cv2.imshow</code>。如果在服务器、WSL 无图形桌面、远程终端里运行，会因为没有显示环境而失败。需要本地图形桌面或配置 X11。</p>
+        </div>
+      </details>
+      <details>
+        <summary>4. ROS 不适合直接在 Windows 跑</summary>
+        <div>
+          <p>当前 ROS 工程是 ROS1 catkin 工作空间，含 Gazebo、RViz、C++ 插件。最省事的环境是 Ubuntu 20.04 虚拟机或双系统。Windows 原生运行成本很高。</p>
+        </div>
+      </details>
+      <details>
+        <summary>5. 复制 ROS 工作空间后要重新构建</summary>
+        <div>
+          <p><code>build</code> 和 <code>devel</code> 记录了旧路径 <code>/home/demo/test_ws</code>。换机器后通常应在 Linux 中重新执行 <code>catkin_make</code>，并重新 <code>source devel/setup.bash</code>。</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="learning">
+      <h2>六、建议学习路线</h2>
+      <ol>
+        <li><strong>先跑普通视觉脚本：</strong>从 <code>巡线/巡线.py</code> 开始，它不依赖深度学习框架，只需要 OpenCV、NumPy、Pillow。</li>
+        <li><strong>再看 YOLO 推理：</strong>比较 <code>红绿灯/light.py</code>、<code>垃圾桶/垃圾桶.py</code>、<code>人/human.py</code>，理解模型加载、图片读取、置信度过滤、画框保存。</li>
+        <li><strong>学习组合任务：</strong>看 <code>楼宇火灾识别/楼宇火灾.py</code>，它把目标检测、OCR、空间关系判断串成完整业务流程。</li>
+        <li><strong>最后学习 ROS：</strong>先看 <code>gazebo_nav/launch/nav11.launch</code> 明白节点启动顺序，再看 <code>pid_planner/src/pid_planner.cpp</code> 理解 move_base 局部规划器接口。</li>
+      </ol>
+
+      <div class="notice ok">
+        <strong>一句话记忆：</strong>视觉脚本靠 Python 包和模型文件跑；ROS 应用靠 Ubuntu + ROS Noetic + catkin + Gazebo 导航栈跑。两个环境可以分开学，不需要一开始混在一起。
+      </div>
+    </section>
+  </main>
+</body>
+</html>

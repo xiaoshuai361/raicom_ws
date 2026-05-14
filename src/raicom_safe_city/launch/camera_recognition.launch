@@ -1,0 +1,6 @@
+<launch>
+  <node name="camera_color_detector" pkg="raicom_safe_city" type="camera_color_detector.py" output="screen">
+    <param name="image_topic" value="/camera/rgb/image_raw"/>
+    <param name="min_area" value="280"/>
+  </node>
+</launch>

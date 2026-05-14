@@ -1,0 +1,7 @@
+<library path="lib/libpid_planner">
+ <class name="pid_planner/PIDPlanner" type="pid_planner::PIDPlanner" base_class_type="nav_core::BaseLocalPlanner">
+  <description>
+    自制局部路径规划器
+  </description>
+ </class>
+</library>

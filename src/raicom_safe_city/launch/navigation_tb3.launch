@@ -1,0 +1,53 @@
+<launch>
+  <arg name="start_gazebo" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="map_file" default="$(find raicom_safe_city)/maps/safe_city_map.yaml"/>
+  <arg name="initial_x" default="1.38"/>
+  <arg name="initial_y" default="0.0"/>
+  <arg name="initial_a" default="1.5708"/>
+
+  <group if="$(arg start_gazebo)">
+    <include file="$(find raicom_safe_city)/launch/gazebo_tb3.launch">
+      <arg name="x" value="$(arg initial_x)"/>
+      <arg name="y" value="$(arg initial_y)"/>
+      <arg name="yaw" value="$(arg initial_a)"/>
+      <arg name="gui" value="$(arg gui)"/>
+      <arg name="headless" value="$(arg headless)"/>
+    </include>
+  </group>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen"/>
+
+  <node name="amcl" pkg="amcl" type="amcl" output="screen">
+    <param name="odom_model_type" value="diff"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="base_frame_id" value="base_footprint"/>
+    <param name="global_frame_id" value="map"/>
+    <param name="scan_topic" value="/scan"/>
+    <param name="min_particles" value="300"/>
+    <param name="max_particles" value="1600"/>
+    <param name="kld_err" value="0.03"/>
+    <param name="update_min_d" value="0.04"/>
+    <param name="update_min_a" value="0.08"/>
+    <param name="resample_interval" value="1"/>
+    <param name="transform_tolerance" value="0.3"/>
+    <param name="laser_max_range" value="3.5"/>
+    <param name="initial_pose_x" value="$(arg initial_x)"/>
+    <param name="initial_pose_y" value="$(arg initial_y)"/>
+    <param name="initial_pose_a" value="$(arg initial_a)"/>
+  </node>
+
+  <node name="move_base" pkg="move_base" type="move_base" respawn="false" output="screen">
+    <rosparam file="$(find raicom_safe_city)/config/costmap_common_tb3.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find raicom_safe_city)/config/costmap_common_tb3.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find raicom_safe_city)/config/global_costmap.yaml" command="load"/>
+    <rosparam file="$(find raicom_safe_city)/config/local_costmap.yaml" command="load"/>
+    <rosparam file="$(find raicom_safe_city)/config/base_local_planner.yaml" command="load"/>
+    <rosparam file="$(find raicom_safe_city)/config/move_base.yaml" command="load"/>
+  </node>
+
+  <node if="$(arg rviz)" name="rviz_navigation" pkg="rviz" type="rviz"
+        args="-d $(find raicom_safe_city)/config/navigation.rviz" output="screen"/>
+</launch>

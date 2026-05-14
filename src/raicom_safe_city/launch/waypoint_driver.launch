@@ -1,0 +1,20 @@
+<launch>
+  <arg name="start_gazebo" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="auto_start" default="true"/>
+
+  <group if="$(arg start_gazebo)">
+    <include file="$(find raicom_safe_city)/launch/gazebo_tb3.launch">
+      <arg name="gui" value="$(arg gui)"/>
+      <arg name="headless" value="$(arg headless)"/>
+    </include>
+  </group>
+
+  <node name="waypoint_driver" pkg="raicom_safe_city" type="waypoint_driver.py" output="screen">
+    <param name="auto_start" value="$(arg auto_start)"/>
+    <param name="goal_tolerance" value="0.13"/>
+    <param name="max_linear" value="0.16"/>
+    <param name="max_angular" value="0.75"/>
+  </node>
+</launch>

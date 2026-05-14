@@ -1,0 +1,19 @@
+<launch>
+
+  <!-- 载入 机器人 和 SLAM 的仿真场景 -->
+  <include file="$(find gazebo_pkg)/launch/map11.launch" />
+
+  <!-- Hector SLAM -->
+  <node pkg="hector_mapping" type="hector_mapping" name="hector_mapping">
+    <param name="tf_map_scanmatch_transform_frame_name" value="base_footprint" />
+  </node>
+
+  <!-- Rviz 显示 -->
+  <arg name="rvizconfig" default="$(find gazebo_map)/rviz/demo.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+ 
+
+  <!-- 运动控制 -->
+  <node pkg="rqt_robot_steering" type="rqt_robot_steering" name="rqt_robot_steering"/>
+
+</launch>

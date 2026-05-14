@@ -1,0 +1,35 @@
+# Catkin / ROS build artifacts
+build/
+devel/
+install/
+.catkin_workspace
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# IDE / editor metadata
+.idea/
+.vscode/
+
+# Runtime logs and temporary files
+log/
+logs/
+*.log
+*.tmp
+
+# Generated recognition outputs and sample-heavy assets
+output_images/
+result/
+
+# Old nested ROS workspace artifacts
+2025源码/ROS应用/build/
+2025源码/ROS应用/devel/
+2025源码/ROS应用/.catkin_workspace
+2025源码/ROS应用/src/jie_ware/
+
+# Demo videos and large sample image folders are not required for source rebuild
+*.mkv
+*.mp4
+*.avi
+2025源码/**/images/
