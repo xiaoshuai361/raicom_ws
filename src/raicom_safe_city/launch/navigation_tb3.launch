@@ -7,6 +7,7 @@
   <arg name="initial_x" default="1.38"/>
   <arg name="initial_y" default="0.0"/>
   <arg name="initial_a" default="1.5708"/>
+  <arg name="run_proximity_recognition" default="false"/>
 
   <group if="$(arg start_gazebo)">
     <include file="$(find raicom_safe_city)/launch/gazebo_tb3.launch">
@@ -15,6 +16,7 @@
       <arg name="yaw" value="$(arg initial_a)"/>
       <arg name="gui" value="$(arg gui)"/>
       <arg name="headless" value="$(arg headless)"/>
+      <arg name="run_proximity_recognition" value="$(arg run_proximity_recognition)"/>
     </include>
   </group>
 

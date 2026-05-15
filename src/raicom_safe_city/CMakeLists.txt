@@ -14,6 +14,7 @@ catkin_package()
 
 catkin_install_python(PROGRAMS
   scripts/proximity_recognition_node.py
+  scripts/camera_model_recognition_node.py
   scripts/centerline_follower.py
   scripts/multi_goal_patrol.py
   scripts/waypoint_driver.py

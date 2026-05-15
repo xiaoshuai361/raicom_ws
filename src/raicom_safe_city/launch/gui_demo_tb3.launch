@@ -1,12 +1,16 @@
 <launch>
   <arg name="rviz" default="true"/>
   <arg name="run_waypoint_driver" default="false"/>
+  <arg name="run_camera_recognition" default="true"/>
   <arg name="run_camera_detector" default="false"/>
+  <arg name="run_proximity_recognition" default="false"/>
+  <arg name="use_gpu" default="true"/>
   <arg name="auto_start" default="true"/>
 
   <include file="$(find raicom_safe_city)/launch/navigation_tb3.launch">
     <arg name="gui" value="true"/>
     <arg name="rviz" value="$(arg rviz)"/>
+    <arg name="run_proximity_recognition" value="$(arg run_proximity_recognition)"/>
   </include>
 
   <node if="$(arg run_waypoint_driver)" name="waypoint_driver" pkg="raicom_safe_city"
@@ -16,6 +20,23 @@
     <param name="goal_timeout" value="90.0"/>
     <param name="max_linear" value="0.16"/>
     <param name="max_angular" value="0.75"/>
+  </node>
+
+  <node if="$(arg run_camera_recognition)" name="camera_model_recognition" pkg="raicom_safe_city"
+        type="camera_model_recognition_node.py" output="screen">
+    <env name="LD_LIBRARY_PATH" value="/home/zcy/.local/lib/python3.8/site-packages/nvidia/curand/lib:/home/zcy/.local/lib/python3.8/site-packages/nvidia/cufft/lib:/home/zcy/.local/lib/python3.8/site-packages/nvidia/nvjitlink/lib:$(optenv LD_LIBRARY_PATH)"/>
+    <param name="image_topic" value="/camera/rgb/image_raw"/>
+    <param name="model_root" value="/home/zcy/raicom_ws/2025源码"/>
+    <param name="process_hz" value="3.0"/>
+    <param name="stable_frames" value="1"/>
+    <param name="reset_after_missed_frames" value="6"/>
+    <param name="report_cooldown" value="8.0"/>
+    <param name="garbage_min_area_ratio" value="0.10"/>
+    <param name="human_min_area_ratio" value="0.07"/>
+    <param name="building_min_area_ratio" value="0.10"/>
+    <param name="use_fire_color_hint" value="true"/>
+    <param name="enable_ocr" value="false"/>
+    <param name="use_gpu" value="$(arg use_gpu)"/>
   </node>
 
   <node if="$(arg run_camera_detector)" name="camera_color_detector" pkg="raicom_safe_city"
